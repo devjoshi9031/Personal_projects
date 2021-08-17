@@ -8,37 +8,21 @@
 char circular_buffer[SIZE];
 int buffer_empty = 1, buffer_full=0;
 int HEAD=0, TAIL=0;
-char *test = "To be, or not to be: that is the question:\n"
-    "Whether 'tis nobler in the mind to suffer\n"
-    "The slings and arrows of outrageous fortune,\n"
-    "Or to take arms against a sea of troubles,\n"
-    "And by opposing end them? To die, to sleep--\n"
-    "No more--and by a sleep to say we end\n"
-    "The heart-ache and the thousand natural shocks\n"
-    "That flesh is heir to, 'tis a consummation\n"
-    "Devoutly to be wish'd. To die, to sleep;\n"
-    "To sleep: perchance to dream: ay, there's the rub;\n"
-    "For in that sleep of death what dreams may come\n"
-    "When we have shuffled off this mortal coil,\n"
-    "Must give us pause.";
-    char buffer[1024];
 
 size_t cbfifo_enqueue(void *buf, size_t nbyte){    
     if(buffer_full==1 || nbyte==0){
-        //printf("Buffer already FULL: ABORTING!!!\n");
         return 0;
     }
+    
     buffer_empty = 0;
     int j=0;
     for (int i=0; i<nbyte; i++){
-        circular_buffer[HEAD] = *(test+i);
+        circular_buffer[HEAD] = *((char*)buf);
         HEAD = (HEAD+1)%SIZE;
         j++;
+        buf++;
         if(HEAD==TAIL){
-            //printf("Buffer FULL: ABORTING!!!");
             buffer_full = 1;
-            if(i==0)
-                return 0;
             return j;
             
         }
@@ -51,17 +35,21 @@ size_t cbfifo_dequeue(void *buf, size_t nbyte){
     if(buffer_empty==1 || nbyte==0){    
         return 0;
     }
+    char temp[1024];
     buffer_full = 0;
     for(int i=0; i<nbyte; i++){
-        (buffer[i]) = circular_buffer[TAIL];
+        temp[i] = circular_buffer[TAIL]; 
+        strncpy((char *)buf, &circular_buffer[TAIL],1);
         circular_buffer[TAIL]='\0';
         TAIL = (TAIL+1)%SIZE;
         j=j+1;
+        buf++;
         if(TAIL==HEAD){     
             buffer_empty = 1;
             return j;
         }
     }
+   
     return j;
 }
 

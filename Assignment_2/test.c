@@ -83,9 +83,7 @@ test_cbfifo_one_iteration()
   test_equal(cbfifo_length(), 10);
   test_equal(cbfifo_dequeue(buf, 10), 10);
   test_equal(strncmp(buf, str, 10), 0);
-  printf("%s\n",buf);
   test_equal(cbfifo_length(), 0);
-
   // enqueue 20 bytes;  dequeue 5, then another 20
   test_equal(cbfifo_enqueue(str, 20), 20);
   test_equal(cbfifo_length(), 20);
@@ -129,15 +127,13 @@ test_cbfifo_one_iteration()
     test_equal(cbfifo_length(), chunk_size*4 - i - 1);
   }
   test_equal(strncmp(buf, str, chunk_size*4), 0);
-  
   // write more than capacity
   test_equal(cbfifo_enqueue(str, 65), 65);
   test_equal(cbfifo_enqueue(str+65, cap), cap-65);
   test_equal(cbfifo_length(), cap);
   test_equal(cbfifo_dequeue(buf, cap), cap);
   test_equal(cbfifo_length(), 0);
-  test_equal(strncmp(buf, str, cap), 0);
-
+  test_equal(strncmp(buf, str, cap), 0)
   // write zero bytes
   test_equal(cbfifo_enqueue(str, 0), 0);
   test_equal(cbfifo_length(), 0);
@@ -153,21 +149,18 @@ test_cbfifo_one_iteration()
   test_equal(cbfifo_length(), 32);
   test_equal(cbfifo_dequeue(buf, 16), 16);
   test_equal(cbfifo_length(), 16);
-  test_equal(strncmp(buf, str, 16), 0);
-
+  test_equal(strncmp(buf, str, 16), 0)
   test_equal(cbfifo_enqueue(str+32, 32), 32);  // (1)
   test_equal(cbfifo_length(), 48);
   test_equal(cbfifo_enqueue(str+64, cap-64), cap-64);  // (2)
   test_equal(cbfifo_length(), cap-16);
   test_equal(cbfifo_dequeue(buf+16, cap-16), cap-16);
   test_equal(strncmp(buf, str, cap), 0);
-  
   test_equal(cbfifo_enqueue(str, 32), 32);  // advance so that read < write
   test_equal(cbfifo_length(), 32);
   test_equal(cbfifo_dequeue(buf, 16), 16);
   test_equal(cbfifo_length(), 16);
-  test_equal(strncmp(buf, str, 16), 0);
-
+  test_equal(strncmp(buf, str, 16), 0)
   test_equal(cbfifo_enqueue(str+32, cap-20), cap-20);  // (3)
   test_equal(cbfifo_length(), cap-4);
   test_equal(cbfifo_dequeue(buf, cap-8), cap-8);
@@ -181,27 +174,23 @@ test_cbfifo_one_iteration()
   test_equal(cbfifo_length(), 49);
   test_equal(cbfifo_dequeue(buf, 16), 16);
   test_equal(cbfifo_length(), 33);
-  test_equal(strncmp(buf, str, 16), 0);
-
+  test_equal(strncmp(buf, str, 16), 0)
   test_equal(cbfifo_enqueue(str+49, cap-33), cap-33);  // (4)
   test_equal(cbfifo_length(), cap);
   test_equal(cbfifo_dequeue(buf, cap), cap);
   test_equal(cbfifo_length(), 0);
-  test_equal(strncmp(buf, str+16, cap), 0);
-
+  test_equal(strncmp(buf, str+16, cap), 0)
   test_equal(cbfifo_enqueue(str, 32), 32);  // advance so that read < write
   test_equal(cbfifo_length(), 32);
   test_equal(cbfifo_dequeue(buf, 16), 16);
   test_equal(cbfifo_length(), 16);
-  test_equal(strncmp(buf, str, 16), 0);
-
+  test_equal(strncmp(buf, str, 16), 0)
   test_equal(cbfifo_enqueue(str+32, cap), cap-16);  // (5)
   test_equal(cbfifo_dequeue(buf, 1), 1);
   test_equal(cbfifo_length(), cap-1);
   test_equal(cbfifo_dequeue(buf+1, cap-1), cap-1);
   test_equal(cbfifo_length(), 0);
-  test_equal(strncmp(buf, str+16, cap), 0);
-
+  test_equal(strncmp(buf, str+16, cap), 0)
   //    enqueue when write < read:
   //        bytes < read-write (6)
   //        bytes exactly read-write (= the space available) (7)
@@ -223,8 +212,7 @@ test_cbfifo_one_iteration()
   test_equal(cbfifo_length(), cap-8);
   test_equal(cbfifo_dequeue(buf, cap), cap-8);
   test_equal(cbfifo_length(), 0);
-  test_equal(strncmp(buf, str+rpos, cap-8), 0);
-
+  test_equal(strncmp(buf, str+rpos, cap-8), 0)
   // reset
   wpos=0;
   rpos=0;
@@ -243,8 +231,7 @@ test_cbfifo_one_iteration()
   test_equal(cbfifo_length(), cap);
   test_equal(cbfifo_dequeue(buf, cap), cap);
   test_equal(cbfifo_length(), 0);
-  test_equal(strncmp(buf, str+rpos, cap), 0);
-
+  test_equal(strncmp(buf, str+rpos, cap), 0)
   // reset
   wpos=0;
   rpos=0;
