@@ -44,6 +44,8 @@ int g_tests_total = 0;
   }                                                                     \
 }
 
+
+
 static void
 test_cbfifo_one_iteration()
 {
@@ -81,12 +83,12 @@ test_cbfifo_one_iteration()
   test_equal(cbfifo_length(), 10);
   test_equal(cbfifo_dequeue(buf, 10), 10);
   test_equal(strncmp(buf, str, 10), 0);
+  printf("%s\n",buf);
   test_equal(cbfifo_length(), 0);
 
   // enqueue 20 bytes;  dequeue 5, then another 20
   test_equal(cbfifo_enqueue(str, 20), 20);
   test_equal(cbfifo_length(), 20);
-  //askdjfhdsjkfh
   test_equal(cbfifo_dequeue(buf, 5), 5);
   test_equal(cbfifo_length(), 15);
   test_equal(cbfifo_dequeue(buf+5, 20), 15);
@@ -108,7 +110,7 @@ test_cbfifo_one_iteration()
   test_equal(cbfifo_dequeue(buf, 18), 18);
   test_equal(cbfifo_length(), 2);
   test_equal(strncmp(buf, str, 18), 0);
-
+  
   // Now add a bunch of data in 4 chunks
   int chunk_size = (cap-2) / 4;
   for (int i=0; i<4; i++) {
