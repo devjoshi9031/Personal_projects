@@ -1,1 +1,3 @@
 test_file.c
+string_test.c
+*.exe
