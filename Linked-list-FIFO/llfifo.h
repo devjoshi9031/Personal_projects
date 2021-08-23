@@ -53,7 +53,7 @@ int llfifo_enqueue(llfifo_t *fifo, void *element);
  * Returns:
  *   The dequeued element, or NULL if the FIFO was empty
  */
-void *llfifo_dequeue(llfifo_t *fifo);
+int llfifo_dequeue(llfifo_t *fifo);
 
 
 /*
@@ -91,5 +91,7 @@ int llfifo_capacity(llfifo_t *fifo);
  * Returns: none
  */
 void llfifo_destroy(llfifo_t *fifo);
+
+void print(llfifo_t *fifo);
 
 #endif // _LLFIFO_H_

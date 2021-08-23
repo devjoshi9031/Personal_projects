@@ -6,20 +6,20 @@
 
 
 #define SIZE 128
-
+char ans[SIZE];     // array to send the dequeued element from the LLFIFO.
 struct llfifo_s{
     char msg[SIZE];
     int tag;
     struct llfifo_s* link;
 };
 
-//llfifo_t *head;
-
 llfifo_t *llfifo_create(int capacity){
-    llfifo_t *node, *tmp,*head=NULL;
-    if(capacity==0)
-        return NULL;                 // This is to get two extra nodes. 1 for mallocing and 1 for traversing.
-    for(int i=1;i<=capacity;i++){
+    llfifo_t *node, *tmp,*start=NULL;
+    // This to check if the capacity is a valid number.
+    if(capacity==0)             
+        return NULL;              
+
+    for(int i=0;i<capacity;i++){
         tmp = (llfifo_t *) malloc(sizeof(llfifo_t));        //malloc untill the capacity of nodes reached.
 
         if(tmp==NULL){
@@ -29,55 +29,113 @@ llfifo_t *llfifo_create(int capacity){
         tmp->msg[0] = '\0';
         tmp->tag = i;
         tmp->link = NULL;
-        if(i==1){
-            head=tmp;
-            //("In create: %s and strlen: %d\n",head->msg,strlen(head->msg));
+        // variable to return the head of the LLFIFO.
+        if(i==0){
+            start=tmp;
             continue;
-
         }
-        node=head;
+        // Traverse the linked list and attach a new element at the end of the FIFO.
+        node=start;
         while(node->link!=NULL){
                 node = node->link;
             }
             node->link = tmp;
     }// end of for
-    return head;
+    return start;
 }// end of llfifo_create
 
-int llfifo_length(llfifo_t *fifo){
-    int length =0;
+
+int llfifo_enqueue(llfifo_t *fifo, void *element){
     llfifo_t *tmp;
-    tmp = fifo;
-    if(fifo->link == NULL && strlen(fifo->msg)==0){
-        return length;
-    }
-    while(tmp->link!=NULL){
-        if(strlen(tmp->msg) == 0){
-            // //(" In Length: %d\n",tmp->tag);
-            tmp = tmp->link;
-            continue;
+    int length=0,copy=0,return_length = 0,non_empty=0;
+    length = llfifo_length(fifo);               // Get the current length of the FIFO.
+    int capacity = llfifo_capacity(fifo);       // Get the current capacity of the FIFO.
+    tmp=fifo;
+    // Traverse the whole FIFO and check if any element has the tmp->msg field empty. If so insert the element at that node.
+    while(tmp!=NULL){
+        if(strlen(tmp->msg)!=0){
+            non_empty=1;
+            break;
         }
-        // //("In Length: %d\n",tmp->tag);
-        tmp = tmp->link;
+        tmp=tmp->link;
+    }
+    // If the linked list is empty start inserting at the first node!
+    if(non_empty==0)
+        tmp = fifo;
+    for(int i=1;i<=capacity;i++){
+        if((strlen(tmp->msg)==0) && (copy==0)){
+            copy=1;
+            strcpy(tmp->msg,(char*)element);
+            length++;
+        }
+        if(tmp->link == NULL)
+            break;
+        tmp=tmp->link;        
+    }
+    //check for the last element. If it is the only element empty then write in that element!
+    if((strlen(tmp->msg)==0) && (copy==0)){
+        copy=1;
+        strcpy(tmp->msg,(char*)element);
         length++;
     }
-    if((tmp->link == NULL && (strlen(tmp->msg) == 0)))        
-        return length;
-    else
-        return length+1;
+    // If capacity is reached, then add another node!
+
+    if(copy==0){
+        llfifo_t *new_node;
+            new_node = (llfifo_t*)malloc(sizeof(llfifo_t));
+            strcpy(new_node->msg,(char*)element);
+            new_node->link = NULL;
+            tmp->link = new_node;
+            length++;
+    }
+return length;    
 }
 
 
-int llfifo_capacity(llfifo_t *fifo){
-    int capacity =1;
+int llfifo_dequeue(llfifo_t *fifo){
+    memset(&ans[0],'\0',SIZE);          //empty the character array.
+    int capacity;
+    capacity = llfifo_capacity(fifo);   //Get the capacity of the FIFO
+    if(capacity==0)
+        return NULL;
     llfifo_t *tmp;
-    tmp = fifo;
-    while(tmp->link!=NULL){            
-        tmp = tmp->link;
-        capacity++;
+    //start from the first element and traverse the whole FIFO to get any element that is not being dequeued.
+    tmp=fifo;
+    for(int i=0; i<capacity;i++){
+        if(strlen(tmp->msg)!=0){
+            strcpy(&ans[0],tmp->msg);
+            memset(tmp->msg,'\0',SIZE);
+            tmp->msg[0]='\0';
+            return strlen(ans);
+        } 
+         if(tmp->link == NULL){
+             break;
+         }
+        tmp=tmp->link;        
     }
-        
-    return capacity;
+    // Check for the last element if it has any msg to deqeueue.
+    if((strlen(tmp->msg))!=0){
+            strcpy(&ans[0],tmp->msg);
+            memset(tmp->msg,'\0',SIZE);
+            tmp->msg[0]='\0';
+            return strlen(ans);
+    }
+    return NULL;
+}
+
+//PRINT function to print the whole LLFIFO.
+void print(llfifo_t *fifo){
+    llfifo_t *start;
+    start = fifo;
+    printf("PRINT FUNCTION:\n");
+    while(start!=NULL){
+        if(strlen(start->msg)==0){
+            start=start->link;
+            continue;
+        }            
+        printf("%s\n",start->msg);
+        start=start->link;
+    }
 }
 
 void llfifo_destroy(llfifo_t *fifo){
@@ -87,73 +145,55 @@ void llfifo_destroy(llfifo_t *fifo){
         fifo = fifo->link;
         if(fifo->link==NULL){
             free(tmp);
-           // //("In destroy in if: %d\n",tmp->tag);
             free(fifo);
-           // //("In destroy in if: %d\n",fifo->tag);
             return;
         }
-       // //("In destroy: %d\n",tmp->tag);
         free(tmp);
     }
     return;
 }
 
-int llfifo_enqueue(llfifo_t *fifo, void *element){
-    llfifo_t *tmp;
-    int length=0;
-    //printf("Tag\tString\n");
-    //First node and if it is empty! THis works great.
-    if((strlen(fifo->msg)==0)){
-        strcpy(fifo->msg,(char*)element);
-        //("%d\t%s\t\n",fifo->tag,fifo->msg);
-        length++;
-        return length;
-    }
-    //For all the other nodes that are between head and last element!
-    while(fifo->link!=NULL){
-        if(strlen(fifo->msg) == 0){
-            // fifo->msg = *(char*)element;
-            strcpy(fifo->msg,(char*)element);
-            //("%d\t%s\t\n",fifo->tag,fifo->msg);
-            length++;
-            return length;
-        }
-        length++;
-        fifo = fifo->link;
-    }
-    //This is for the last element if added and the msg is nothing;
-    if(strlen(fifo->msg) == 0){
-            strcpy(fifo->msg,(char*)element);
-            //("%d\t%s\t\n",fifo->tag,fifo->msg);
-            length++;
-            return length;
-    }
-    //Finally if length == CApapcity and a new node has to be added!
-    else{
-        tmp = (llfifo_t*)malloc(sizeof(llfifo_t));
-        strcpy(tmp->msg,(char*)element);
-        //("%d\t%s\t\n",fifo->tag,fifo->msg);
-        tmp->link = NULL;
-        fifo->link = tmp;
-        length++;
-        return length;
-    }
-    return length;
 
-}
-
-void *llfifo_dequeue(llfifo_t *fifo){
+int llfifo_length(llfifo_t *fifo){
+    int length =0;
     llfifo_t *tmp;
-    char ans[128];
-    if(strlen(fifo->msg)==0)
-        return NULL;
     tmp = fifo;
-    fifo = fifo->link;    
-    strcpy(&ans[0],tmp->msg);
-  //  printf("Return: %s\n",ans);
-    return (void*)ans;
-    
+    if(fifo==NULL)
+        return length;
+    if(fifo->link == NULL && strlen(fifo->msg)!=0){
+        return ++length;
+    }
+    while(tmp->link!=NULL){
+        if(strlen(tmp->msg) == 0){
+            tmp = tmp->link;
+            continue;
+        }
+        tmp = tmp->link;
+        length++;
+    }
+    if((tmp->link == NULL && (strlen(tmp->msg) != 0)))        
+        return ++length;
+    return length;
 }
+
+
+int llfifo_capacity(llfifo_t *fifo){
+    int capacity =1;
+    llfifo_t *tmp;
+    tmp = fifo;
+    if(tmp==NULL)
+        return 0;
+    while(tmp->link!=NULL){    
+        tmp = tmp->link;
+        capacity++;
+    }        
+    return capacity;
+}
+
+
+
+
+
 // void main(){
 //         llfifo_t *head;
 //           char *strs[] =

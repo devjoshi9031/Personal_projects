@@ -33,7 +33,7 @@ int g_tests_total = 0;
 }
 
 #define test_equal(value1, value2) {                                    \
-  g_tests_total++;                                                      \
+  g_tests_total++;                                                                      \
   long res1 = (long)(value1);                                           \
   long res2 = (long)(value2);                                           \
   if (res1 == res2) {                                                   \
@@ -66,6 +66,7 @@ test_llfifo_one_iteration(int capacity)
   const int strs_len = sizeof(strs) / sizeof(const char *);
   llfifo_t *fifo;
 
+
   fifo = llfifo_create(capacity);
   test_assert(fifo != NULL);
 
@@ -77,9 +78,8 @@ test_llfifo_one_iteration(int capacity)
   test_equal(llfifo_enqueue(fifo, strs[0]), 1);
   test_equal(llfifo_capacity(fifo), max(capacity, 1));
   test_equal(llfifo_length(fifo), 1);
-  //test_equal(llfifo_dequeue(fifo), strs[0]);
-  char *ans = llfifo_dequeue(fifo);
-  printf("return: %s",ans);
+  test_equal(llfifo_dequeue(fifo), strlen(strs[0]));
+  
 
   test_equal(llfifo_capacity(fifo), max(capacity, 1));
   test_equal(llfifo_length(fifo), 0);
@@ -87,15 +87,14 @@ test_llfifo_one_iteration(int capacity)
   // enqueue all the elements, then dequeue all
   for (int i=0; i<strs_len; i++) {
     test_equal(llfifo_enqueue(fifo, strs[i]), i+1);
-    test_equal(llfifo_capacity(fifo), max(capacity, i+1));
+    test_equal(llfifo_capacity(fifo), max(capacity, i+1));  
     test_equal(llfifo_length(fifo), i+1);
   }
   for (int i=0; i<strs_len; i++) {
-    test_equal(llfifo_dequeue(fifo), strs[i]);
+    test_equal(llfifo_dequeue(fifo), strlen(strs[i]));    
     test_equal(llfifo_length(fifo), strs_len - i - 1);
     test_equal(llfifo_capacity(fifo), max(capacity, strs_len));
   }
-
   // should be empty now
   test_equal(llfifo_length(fifo), 0);
   test_equal(llfifo_dequeue(fifo), NULL);
@@ -103,14 +102,15 @@ test_llfifo_one_iteration(int capacity)
 
   // enqueue one, then enqueue one, dequeue one, etc, through the whole list
   test_equal(llfifo_enqueue(fifo, strs[0]), 1);
+  
   for (int i=1; i<strs_len; i++) {
     test_equal(llfifo_enqueue(fifo, strs[i]), 2);
     test_equal(llfifo_length(fifo), 2);
-    test_equal(llfifo_dequeue(fifo), strs[i-1]);
+    test_equal(llfifo_dequeue(fifo), strlen(strs[i-1]));
     test_equal(llfifo_length(fifo), 1);
     test_equal(llfifo_capacity(fifo), max(capacity, strs_len));
   }
-  test_equal(llfifo_dequeue(fifo), strs[strs_len-1]);
+  test_equal(llfifo_dequeue(fifo), strlen(strs[strs_len-1]));
   
   // should be empty now
   test_equal(llfifo_length(fifo), 0);
@@ -140,7 +140,7 @@ test_llfifo_one_iteration(int capacity)
   // now dequeue and make sure everything comes out correctly
   for (int i=0; i<strs_len; i++) {
     llfifo_t * this_fifo = (i & 0x1) ? fifo : fifo2;
-    test_equal(llfifo_dequeue(this_fifo), strs[i]);
+    test_equal(llfifo_dequeue(this_fifo), strlen(strs[i]));
   }
   test_equal(llfifo_length(fifo), 0);
   test_equal(llfifo_length(fifo2), 0);
